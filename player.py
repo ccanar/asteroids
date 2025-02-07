@@ -7,12 +7,20 @@ from constants import PLAYER_TURN_SPEED
 from constants import PLAYER_SPEED
 from constants import PLAYER_SHOOT_SPEED
 from constants import PLAYER_SHOOT_COOLDOWN
+from constants import PLAYER_STATUS_NOMINAL
+from constants import PLAYER_STATUS_DEAD
+from constants import PLAYER_STATUS_TOOK_DAMAGE
+from constants import PLAYER_SPAWN_POSITION_X
+from constants import PLAYER_SPAWN_POSITION_Y
 
 class Player(CircleShape):
-    def __init__(self, x, y):
+    def __init__(self, x, y, lives):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shoot_cooldown = 0 # time to next shot
+        self.lives = lives
+        self.status = PLAYER_STATUS_NOMINAL
+
 
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -39,11 +47,26 @@ class Player(CircleShape):
 
             self.shoot_cooldown = PLAYER_SHOOT_COOLDOWN
 
+    def take_damage(self):
+        self.lives -= 1
+        self.status = PLAYER_STATUS_TOOK_DAMAGE
+
+    def get_lives(self):
+        return self.lives
+
+    def get_status(self):
+        if self.status == PLAYER_STATUS_TOOK_DAMAGE:
+            if self.lives == 0:
+                return PLAYER_STATUS_DEAD
+        return self.status
+
+    def reset(self):
+        self.position = (PLAYER_SPAWN_POSITION_X, PLAYER_SPAWN_POSITION_Y)
+        self.status = PLAYER_STATUS_NOMINAL
+
     def update(self, dt):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_ESCAPE]:
-            exit()
         if keys[pygame.K_a]:
             self.rotate(-dt)
         if keys[pygame.K_d]:
