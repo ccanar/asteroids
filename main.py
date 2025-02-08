@@ -1,5 +1,6 @@
 # this allows us to use code from the open-sourse pygame library throughout this file
 import pygame
+import pygame.freetype
 from constants import *
 from player import Player
 from asteroid import Asteroid
@@ -25,43 +26,63 @@ def main():
     AsteroidField.containers = (updatable)
     Shot.containers = (updatable, drawable, shots)
 
-    scoring_system = ScoringSystem()
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, PLAYER_MAX_LIVES)
 
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    scoring_system = ScoringSystem()
     asteroid_field = AsteroidField()
 
+    game_status = GAME_STATUS_RUNNING
     while True:
+        if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            quit()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+    
+        if game_status == GAME_STATUS_RUNNING:    
+            updatable.update(dt)
 
-        # for thing in updatable:
-        #     thing.update(dt)
-        updatable.update(dt)
+            for asteroid in asteroids:
+                if asteroid.collides_with(player):
+                    player.take_damage()
 
+            for asteroid in asteroids:
+                for shot in shots:
+                    if asteroid.collides_with(shot):
+                        asteroid.split()
+                        shot.kill()
 
-        for asteroid in asteroids:
-            if asteroid.collides_with(player):
-                print("Game over!")
-                print(f"You had {scoring_system.get_score()} points!")
-                exit()
+            screen.fill("black")
+            for thing in drawable:
+                thing.draw(screen)
 
-        for asteroid in asteroids:
-            for shot in shots:
-                if asteroid.collides_with(shot):
-                    scoring_system.add_score(asteroid.get_value())
-                    asteroid.split()
-                    shot.kill()
+        status = player.get_status()
+        if status == PLAYER_STATUS_DEAD:
+            game_over(screen)
+            game_status = GAME_STATUS_PLAYER_DEAD
+        elif status == PLAYER_STATUS_TOOK_DAMAGE:
+            player.reset()
+            kill_objects(asteroids)
 
-        screen.fill("black")
-        
-        for thing in drawable:
-            thing.draw(screen)
-
+        draw_ui_player_lives(screen, player.get_lives())
         pygame.display.flip()
         
         # limit framerate to 60 FPS    
         dt = clock.tick(60) / 1000 # converting from milliseconds to seconds
+
+def kill_objects(objects: pygame.sprite.Group):
+    for object in objects:
+        object.kill()
+
+def game_over(screen: pygame.Surface):
+    text_font = pygame.freetype.SysFont(None, 42)
+    # text_font.render_to(screen, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "GAME OVER", "white")
+    text_surf, text_rect = text_font.render("GAME OVER", "white")
+    screen.blit(text_surf, (SCREEN_WIDTH / 2 - text_rect.width / 2, SCREEN_HEIGHT / 3 - text_rect.height / 2))
+
+def draw_ui_player_lives(screen: pygame.Surface, player_lives):
+    text_font = pygame.freetype.SysFont(None, 36)
+    text_font.render_to(screen, (10, 10), f"Lives: {player_lives}", "white")
 
 if __name__ == "__main__":
     main()
