@@ -50,6 +50,7 @@ def main():
                 for shot in shots:
                     if asteroid.collides_with(shot):
                         asteroid.split()
+                        scoring_system.add_score(asteroid.get_value())
                         shot.kill()
 
             screen.fill("black")
@@ -58,13 +59,14 @@ def main():
 
         status = player.get_status()
         if status == PLAYER_STATUS_DEAD:
+            screen.fill("black")
             game_over(screen)
+            scoring_system.draw(screen, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2)
             game_status = GAME_STATUS_PLAYER_DEAD
         elif status == PLAYER_STATUS_TOOK_DAMAGE:
             player.reset()
             kill_objects(asteroids)
 
-        draw_ui_player_lives(screen, player.get_lives())
         pygame.display.flip()
         
         # limit framerate to 60 FPS    
@@ -79,10 +81,6 @@ def game_over(screen: pygame.Surface):
     # text_font.render_to(screen, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "GAME OVER", "white")
     text_surf, text_rect = text_font.render("GAME OVER", "white")
     screen.blit(text_surf, (SCREEN_WIDTH / 2 - text_rect.width / 2, SCREEN_HEIGHT / 3 - text_rect.height / 2))
-
-def draw_ui_player_lives(screen: pygame.Surface, player_lives):
-    text_font = pygame.freetype.SysFont(None, 36)
-    text_font.render_to(screen, (10, 10), f"Lives: {player_lives}", "white")
 
 if __name__ == "__main__":
     main()

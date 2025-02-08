@@ -12,15 +12,22 @@ from constants import PLAYER_STATUS_DEAD
 from constants import PLAYER_STATUS_TOOK_DAMAGE
 from constants import PLAYER_SPAWN_POSITION_X
 from constants import PLAYER_SPAWN_POSITION_Y
+from constants import PLAYER_UI_LIVES_FONT
+from constants import PLAYER_UI_LIVES_FONT_SIZE
+from constants import PLAYER_UI_LIVES_POSITION_X
+from constants import PLAYER_UI_LIVES_POSITION_Y
+from constants import PLAYER_UI_LIVES_FONT_COLOR
 
 class Player(CircleShape):
+    
+    
     def __init__(self, x, y, lives):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shoot_cooldown = 0 # time to next shot
         self.lives = lives
         self.status = PLAYER_STATUS_NOMINAL
-
+        self.ui_lives_font = pygame.freetype.SysFont(PLAYER_UI_LIVES_FONT, PLAYER_UI_LIVES_FONT_SIZE)
 
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -32,7 +39,16 @@ class Player(CircleShape):
     
     def draw(self, screen):
         pygame.draw.polygon(screen, "white", self.triangle(), PLAYER_WIDTH)
-    
+        self.ui_lives_font.render_to(
+            screen,
+            (
+                PLAYER_UI_LIVES_POSITION_X, 
+                PLAYER_UI_LIVES_POSITION_Y
+            ),
+            f"Lives: {self.lives}",
+            PLAYER_UI_LIVES_FONT_COLOR
+            )
+
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     
