@@ -1,6 +1,7 @@
 import pygame
 import random
 from circleshape import CircleShape
+from animation import Animation
 from constants import ASTEROID_WIDTH
 from constants import ASTEROID_SPLIT_MIN_ANGLE
 from constants import ASTEROID_SPLIT_MAX_ANGLE
@@ -12,12 +13,16 @@ from constants import ASTEROID_VALUE_BIG
 from constants import ASTEROID_SIZE_SMALL
 from constants import ASTEROID_SIZE_MEDIUM
 from constants import ASTEROID_SIZE_BIG
-
+from constants import ASTEROID_ANIMATION_EXPLOSION_PATH
+from constants import ASTEROID_ANIMATION_EXPLOSION_NAME_OF_FILE
+from constants import ASTEROID_ANIMATION_EXPLOSION_NUM_OF_SPRITES
+from constants import ASTEROID_ANIMATION_EXPLOSION_ANIMATION_SPEED
+from constants import ASTEROID_ANIMATION_EXPLOSION_SCALE
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
-
+        
     def draw(self, screen):
         pygame.draw.circle(screen, "white", self.position, self.radius, ASTEROID_WIDTH)
 
@@ -37,6 +42,7 @@ class Asteroid(CircleShape):
         self.kill()
 
         if self.radius <= ASTEROID_MIN_RADIUS:
+            self.on_kill()
             return
 
         new_angle = random.uniform(ASTEROID_SPLIT_MIN_ANGLE, ASTEROID_SPLIT_MAX_ANGLE)
@@ -50,3 +56,13 @@ class Asteroid(CircleShape):
         new_asteroid2 = Asteroid(self.position.x, self.position.y, new_radius)
         new_asteroid2.velocity = new_velocity2
 
+    def on_kill(self):
+        explosion_animation = Animation(
+            self.position.x, 
+            self.position.y, 
+            ASTEROID_ANIMATION_EXPLOSION_PATH,
+            ASTEROID_ANIMATION_EXPLOSION_NAME_OF_FILE,
+            ASTEROID_ANIMATION_EXPLOSION_NUM_OF_SPRITES,
+            ASTEROID_ANIMATION_EXPLOSION_ANIMATION_SPEED,
+            ASTEROID_ANIMATION_EXPLOSION_SCALE
+            )

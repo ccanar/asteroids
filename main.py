@@ -8,6 +8,7 @@ from asteroidfield import AsteroidField
 from circleshape import CircleShape
 from shot import Shot
 from scoring_system import ScoringSystem
+from animation import Animation
 
 def main():
     pygame.init()
@@ -18,6 +19,7 @@ def main():
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    animations = pygame.sprite.Group()
 
     # add a class variable  called containers to the class
     ScoringSystem.containers = (drawable)
@@ -25,6 +27,7 @@ def main():
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable)
     Shot.containers = (updatable, drawable, shots)
+    Animation.containers = (updatable, drawable, animations)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, PLAYER_MAX_LIVES)
 
@@ -64,17 +67,16 @@ def main():
             scoring_system.draw(screen, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2)
             game_status = GAME_STATUS_PLAYER_DEAD
         elif status == PLAYER_STATUS_TOOK_DAMAGE:
+            for animation in animations:
+                animation.kill()
+            for asteroid in asteroids:
+                asteroid.kill()
             player.reset()
-            kill_objects(asteroids)
 
         pygame.display.flip()
         
         # limit framerate to 60 FPS    
         dt = clock.tick(60) / 1000 # converting from milliseconds to seconds
-
-def kill_objects(objects: pygame.sprite.Group):
-    for object in objects:
-        object.kill()
 
 def game_over(screen: pygame.Surface):
     text_font = pygame.freetype.SysFont(None, 42)
