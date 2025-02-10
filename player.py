@@ -4,7 +4,8 @@ from shot import Shot
 from constants import PLAYER_RADIUS
 from constants import PLAYER_WIDTH
 from constants import PLAYER_TURN_SPEED
-from constants import PLAYER_SPEED
+from constants import PLAYER_ACCELERATION
+from constants import PLAYER_MAX_SPEED
 from constants import PLAYER_SHOOT_SPEED
 from constants import PLAYER_SHOOT_COOLDOWN
 from constants import PLAYER_STATUS_NOMINAL
@@ -18,12 +19,16 @@ from constants import PLAYER_UI_LIVES_POSITION_X
 from constants import PLAYER_UI_LIVES_POSITION_Y
 from constants import PLAYER_UI_LIVES_FONT_COLOR
 
+
 class Player(CircleShape):
     
     
     def __init__(self, x, y, lives):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.acceleration = PLAYER_ACCELERATION
+        self.max_speed = PLAYER_MAX_SPEED
+        self.velocity = pygame.Vector2(0, 0)
         self.shoot_cooldown = 0 # time to next shot
         self.lives = lives
         self.status = PLAYER_STATUS_NOMINAL
@@ -54,7 +59,8 @@ class Player(CircleShape):
         
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * PLAYER_SPEED * dt
+        self.velocity += forward * self.acceleration * dt
+        self.velocity = self.velocity.clamp_magnitude(self.max_speed)
 
     def shoot(self):
         if self.shoot_cooldown <= 0:
@@ -79,6 +85,8 @@ class Player(CircleShape):
     def reset(self):
         self.position = (PLAYER_SPAWN_POSITION_X, PLAYER_SPAWN_POSITION_Y)
         self.status = PLAYER_STATUS_NOMINAL
+        self.velocity = pygame.Vector2(0, 0)
+        self.rotation = 0
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
@@ -94,4 +102,6 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE]:
             self.shoot()
 
+        self.position += self.velocity * dt
+        
         self.shoot_cooldown -= dt       
