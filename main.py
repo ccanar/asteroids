@@ -21,6 +21,8 @@ def main():
     shots = pygame.sprite.Group()
     animations = pygame.sprite.Group()
 
+    background_image = pygame.image.load(f"content/background/background_image.png")
+
     # add a class variable  called containers to the class
     ScoringSystem.containers = (drawable)
     Player.containers = (updatable, drawable)
@@ -56,7 +58,8 @@ def main():
                         scoring_system.add_score(asteroid.get_value())
                         shot.kill()
 
-            screen.fill("black")
+            screen.blit(background_image, (0, 0)) # no fill black cos bg img hast black background
+
             for thing in drawable:
                 thing.draw(screen)
 
